@@ -1,60 +1,61 @@
-version: 2
+version: 2.1
 
 jobs:
-  build_and_test:
+  build:
     docker:
-      - image: circleci/python:2.7
-      - image: rabbitmq:3
-      - image: mongo:3.4
-
+      - image: "circleci/python:3.7.2"
     working_directory: ~/repo
-
     environment:
       VIRTUALENV_DIR: "~/virtualenv"
-      FORCE_CHECK_ALL_FILES: "true"
+      # Don't install various StackStorm dependencies which are already
+      # installed by CI again in the various check scripts
+      ST2_INSTALL_DEPS: "0"
 
     steps:
       - checkout
-      # Download submodules for any PR which might add pack as a submodule
-      - run:
-          name: Checkout submodules
-          command: |
-            git submodule init
-            git submodule update --remote
-      - run:
-          name: Prepare repository
-          command: |
-            .scripts/prepare-repo.sh
       - restore_cache:
-          key: v1-dependency-cache-{{ checksum "requirements.txt" }}
+            key: v1-dependency-cache-py37-{{ checksum "requirements.txt" }}
       - run:
-          name: Download dependencies
+          name: create venv and install dependencies
           command: |
-            git clone -b ${CI_BRANCH:-master} git@github.com:stackstorm-exchange/ci.git ~/ci
-            ~/ci/.circle/dependencies
-      - run:
-          name: Run tests
-          command: ~/ci/.circle/test
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
       - save_cache:
-          key: v1-dependency-cache-{{ checksum "requirements.txt" }}
+          key: v1-dependency-cache-py37-{{ checksum "requirements.txt" }}
           paths:
             - ~/.cache/pip
             - ~/.apt-cache
-      - persist_to_workspace:
-          root: /
-          paths:
-            - home/circleci/ci
-            - home/circleci/virtualenv
-            - tmp/st2
-            - home/circleci/repo
-            - home/circleci/.gitconfig
+  deploy:
+    docker:
+      - image: "circleci/python:3.7.2"
+    working_directory: ~/repo
+    environment:
+      VIRTUALENV_DIR: "~/virtualenv"
+      # Don't install various StackStorm dependencies which are already
+      # installed by CI again in the various check scripts
+      ST2_INSTALL_DEPS: "0"
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-py37-{{ checksum "requirements.txt" }}
+      - attach_workspace:
+          at: /
+      - run:
+          name: Update exchange.stackstorm.org
+          command: |
+            echo $BASH_ENV
+            ~/ci/.circle/deployment
 
 workflows:
-  version: 2
   build_and_test:
     jobs:
-      - build_and_test:
+      - build
+      - deploy:
+          requires:
+            - build # only deploy once build job has completed
           filters:
             branches:
-              ignore:
-                - master
+              only: main
