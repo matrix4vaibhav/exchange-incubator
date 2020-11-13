@@ -43,7 +43,7 @@ jobs:
       - attach_workspace:
           at: /
       - run:
-          name: Update exchange.stackstorm.org
+          name: Deployment
           command: |
             python3 setup.py sdist bdist_wheel
             ls -lrt;
