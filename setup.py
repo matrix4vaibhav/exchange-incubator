@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 requirements = ["ipython>=6", "nbformat>=4", "nbconvert>=5", "requests>=2"]
 setup(
-    name="hellopython-pkg-vagoel66",  # Replace with your own username
+    name="maximo-pkg",  # Replace with your own username
     version="0.0.1",
     author="Vaibhav Goel",
     author_email='vagoel66@in.ibm.com',
