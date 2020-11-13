@@ -21,6 +21,14 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
+            python3 setup.py sdist bdist_wheel
+            echo '-------------->'
+            ls -lrt;
+            mkdir /tmp/artifacts;
+            cp build/ /tmp/artifacts;
+            cp dist/ /tmp/artifacts;
+      - store_artifacts:
+          path: /tmp/artifacts
 
       - save_cache:
           key: v1-dependency-cache-py37-{{ checksum "requirements.txt" }}
