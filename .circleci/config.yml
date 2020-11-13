@@ -25,8 +25,8 @@ jobs:
             echo '-------------->'
             ls -lrt;
             mkdir /tmp/artifacts;
-            cp build/ /tmp/artifacts;
-            cp dist/ /tmp/artifacts;
+            cp -R build/ /tmp/artifacts;
+            cp -R dist/ /tmp/artifacts;
       - store_artifacts:
           path: /tmp/artifacts
 
