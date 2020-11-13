@@ -21,9 +21,6 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-      - store_artifacts:
-          path: /tmp/artifacts
-
       - save_cache:
           key: v1-dependency-cache-py37-{{ checksum "requirements.txt" }}
           paths:
@@ -53,6 +50,8 @@ jobs:
             mkdir /tmp/artifacts;
             cp -R build/ /tmp/artifacts;
             cp -R dist/ /tmp/artifacts;
+      - store_artifacts:
+          path: /tmp/artifacts
 
 workflows:
   build_and_test:
