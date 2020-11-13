@@ -45,6 +45,8 @@ jobs:
       - run:
           name: Deployment
           command: |
+            python3 -m venv venv
+            . venv/bin/activate
             python3 setup.py sdist bdist_wheel
             ls -lrt;
             mkdir /tmp/artifacts;
